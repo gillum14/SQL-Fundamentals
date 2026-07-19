@@ -27,7 +27,7 @@ Without filtering, analysts would need to manually review thousands or even mill
 
 Displays the structure of a database table.
 
-### Syntax
+## Syntax
 
 ```sql
 DESCRIBE table_name;
@@ -59,7 +59,7 @@ Example Output
 
 Filters rows returned by a query.
 
-### Syntax
+## Syntax
 
 ```sql
 SELECT columns
@@ -80,19 +80,31 @@ Only rows matching the condition are returned.
 
 ---
 
-# Equality Operator (`=`)
+# Comparison Operators
+
+Comparison operators allow SQL to compare values and return only matching records.
+
+| Operator | Meaning |
+|-----------|---------|
+| = | Equal |
+| != | Not Equal |
+| <> | Not Equal |
+| > | Greater Than |
+| >= | Greater Than or Equal |
+| < | Less Than |
+| <= | Less Than or Equal |
+
+---
+
+# Equality Operator (=)
 
 Find exact matches.
-
-### Example
 
 ```sql
 SELECT *
 FROM employees
 WHERE department = 'Finance';
 ```
-
----
 
 Another example
 
@@ -104,11 +116,94 @@ WHERE office = 'South-109';
 
 ---
 
+# Greater Than (>)
+
+Returns values greater than the specified value.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date > '2023-01-15';
+```
+
+Common Uses
+
+- Recent login attempts
+- Newly created accounts
+- Devices patched after a certain date
+- Security events after an incident
+
+---
+
+# Greater Than or Equal (>=)
+
+Includes the specified value.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date >= '2023-01-15';
+```
+
+---
+
+# Less Than (<)
+
+Returns values before the specified value.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date < '2023-01-15';
+```
+
+Useful for investigating historical events.
+
+---
+
+# Less Than or Equal (<=)
+
+Includes the specified value.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date <= '2023-01-15';
+```
+
+---
+
+# BETWEEN
+
+Returns values inside an inclusive range.
+
+## Syntax
+
+```sql
+WHERE column
+BETWEEN value1
+AND value2;
+```
+
+### Example
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date
+BETWEEN '2023-02-01'
+AND '2023-02-07';
+```
+
+`BETWEEN` includes both the beginning and ending values.
+
+---
+
 # LIKE
 
 Searches for text patterns.
 
-### Syntax
+## Syntax
 
 ```sql
 WHERE column LIKE pattern;
@@ -116,11 +211,11 @@ WHERE column LIKE pattern;
 
 ---
 
-## Using `%`
+## Using %
 
 The percent sign (`%`) represents zero or more characters.
 
-Example
+### Starts With
 
 ```sql
 WHERE office LIKE 'South%';
@@ -128,7 +223,7 @@ WHERE office LIKE 'South%';
 
 Matches
 
-```text
+```
 South-109
 South-210
 South-315
@@ -136,7 +231,7 @@ South-315
 
 ---
 
-Example
+### Ends With
 
 ```sql
 WHERE office LIKE '%South';
@@ -144,20 +239,58 @@ WHERE office LIKE '%South';
 
 Matches
 
-```text
+```
 Office-South
 Building-South
 ```
 
 ---
 
-Example
+### Contains
 
 ```sql
 WHERE office LIKE '%South%';
 ```
 
-Matches any value containing the word **South**.
+Matches any value containing **South**.
+
+---
+
+# Filtering by Time
+
+Search for events occurring at an exact time.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_time = '09:30:00';
+```
+
+Useful when:
+
+- Investigating suspicious login activity
+- Correlating SIEM alerts
+- Matching firewall logs
+- Reviewing authentication events
+
+---
+
+# Filtering by ID
+
+Retrieve one specific record.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_id = 503;
+```
+
+Common identifiers include:
+
+- login_id
+- employee_id
+- event_id
+- device_id
 
 ---
 
@@ -171,8 +304,6 @@ FROM employees
 WHERE department = 'Finance';
 ```
 
----
-
 Retrieve all Sales employees.
 
 ```sql
@@ -180,8 +311,6 @@ SELECT *
 FROM employees
 WHERE department = 'Sales';
 ```
-
----
 
 Retrieve machines running OS 2.
 
@@ -192,8 +321,6 @@ FROM machines
 WHERE operating_system = 'OS 2';
 ```
 
----
-
 Find a specific office.
 
 ```sql
@@ -202,14 +329,46 @@ FROM employees
 WHERE office = 'South-109';
 ```
 
----
-
 Find every employee in the South building.
 
 ```sql
 SELECT *
 FROM employees
 WHERE office LIKE 'South%';
+```
+
+Find login attempts after a date.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date > '2023-01-15';
+```
+
+Find login attempts during a specific date range.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date
+BETWEEN '2023-02-01'
+AND '2023-02-07';
+```
+
+Find a specific login time.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_time = '09:30:00';
+```
+
+Find a specific login ID.
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_id = 503;
 ```
 
 ---
@@ -223,8 +382,6 @@ WHERE department = 'Finance'
 ```
 
 Returns only rows where the value is exactly **Finance**.
-
----
 
 Pattern Match
 
@@ -245,21 +402,7 @@ WHERE condition
 ORDER BY column;
 ```
 
-The `WHERE` clause filters records **before** sorting occurs.
-
----
-
-# Lab Summary
-
-During this lab I practiced:
-
-- Exploring table structures
-- Filtering records with `WHERE`
-- Finding exact matches
-- Using `LIKE`
-- Searching with wildcard patterns
-- Identifying vulnerable systems
-- Investigating employee information
+The `WHERE` clause filters records before sorting occurs.
 
 ---
 
@@ -275,6 +418,75 @@ Filtering data is commonly used to:
 - Investigate physical office locations
 - Search SIEM exports
 - Analyze endpoint inventories
+- Review security events after a specific date
+- Investigate suspicious login times
+- Locate individual events by unique identifier
+
+---
+
+# Example Investigation Queries
+
+Recent logins
+
+```sql
+SELECT username, login_date
+FROM log_in_attempts
+WHERE login_date > '2025-01-01';
+```
+
+Specific employee
+
+```sql
+SELECT *
+FROM employees
+WHERE employee_id = 1024;
+```
+
+Events during an incident
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_date
+BETWEEN '2025-03-01'
+AND '2025-03-02';
+```
+
+Late-night logins
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE login_time > '22:00:00';
+```
+
+Failed logins from outside the United States
+
+```sql
+SELECT *
+FROM log_in_attempts
+WHERE success = FALSE
+AND country != 'USA';
+```
+
+---
+
+# Lab Summary
+
+During this chapter I practiced:
+
+- Exploring table structures with `DESCRIBE`
+- Filtering records with `WHERE`
+- Finding exact matches
+- Using comparison operators
+- Filtering by date
+- Filtering by time
+- Filtering by unique identifiers
+- Using `BETWEEN`
+- Using `LIKE`
+- Searching with wildcard patterns
+- Investigating employee information
+- Identifying vulnerable systems
 
 ---
 
@@ -282,10 +494,12 @@ Filtering data is commonly used to:
 
 - `DESCRIBE` displays a table's structure.
 - `WHERE` filters records based on specified conditions.
-- `=` performs exact matching.
-- `LIKE` searches for text patterns.
+- Comparison operators allow filtering by numeric, date, and time values.
+- `BETWEEN` filters inclusive ranges.
+- `LIKE` performs pattern matching.
 - `%` represents zero or more characters.
-- Filtering significantly reduces the amount of data analysts need to review.
+- Filtering dramatically reduces the amount of data analysts need to review.
+- Filtering is one of the most frequently used SQL techniques during security investigations.
 
 ---
 
@@ -299,3 +513,5 @@ Filtering data is commonly used to:
 - Asset Management
 - Security Investigations
 - Log Analysis
+- Threat Hunting
+- Authentication Analysis
